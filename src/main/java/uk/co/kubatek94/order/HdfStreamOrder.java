@@ -2,7 +2,7 @@ package uk.co.kubatek94.order;
 
 import uk.co.kubatek94.graph.G;
 import uk.co.kubatek94.graph.V;
-import uk.co.kubatek94.util.SortedArray;
+import uk.co.kubatek94.util.array.SortedArray;
 
 import java.util.Iterator;
 
@@ -37,7 +37,8 @@ public class HdfStreamOrder extends StreamOrder {
 
     @Override
     public V get() {
-        if (currentVertex == null) {
+        return nextVertex();
+        /*if (currentVertex == null) {
             currentVertex = nextVertex();
             neighboursIterator = currentVertex.neighs().iterator();
             return currentVertex;
@@ -52,6 +53,6 @@ public class HdfStreamOrder extends StreamOrder {
 
             currentVertex = null;
             return get();
-        }
+        }*/
     }
 }

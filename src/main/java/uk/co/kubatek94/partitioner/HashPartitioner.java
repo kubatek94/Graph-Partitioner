@@ -15,11 +15,13 @@ public class HashPartitioner extends GraphPartitioner {
     @Override
     public GraphPartitioner partition(G graph) {
         numVertices = graph.vertices().size();
+        int capacity = Math.round(((float)numVertices/maxPartitions) * 1.5f); //highly over-provisioned system
+        int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition((numVertices/numPartitions) * 2); //add more space to make sure that all vertices will fit
+            partitions[i] = new Partition(capacity, fractionPerServer); //add more space to make sure that all vertices will fit
         }
 
         //loop through all vertices and assign each to partition

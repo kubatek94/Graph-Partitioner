@@ -20,24 +20,26 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
     public GraphPartitioner partition(G graph) {
         int numVertices = graph.vertices().size();
         int capacity = Math.round(((float)numVertices/maxPartitions) * 1.1f); //add more space to make sure that all vertices will fit
+        int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(capacity);
+            partitions[i] = new Partition(capacity, fractionPerServer);
         }
 
         Supplier<Partition> minUsedPartition = () -> {
             int minIndex = -1;
-            int minUse = Integer.MAX_VALUE;
+            int minSize = Integer.MAX_VALUE;
 
             for (int i = 0; i < maxPartitions; i++) {
-                int use = partitions[i].getUse();
-                if (use < minUse) {
+                int size = partitions[i].getSize();
+                if (size < minSize) {
                     minIndex = i;
-                    minUse = use;
+                    minSize = size;
                 }
             }
+
             return partitions[minIndex];
         };
 
@@ -57,7 +59,7 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
                         .entrySet().stream()
                         .map(e -> {
                             int partitionIndex = e.getKey(); //take the partition index
-                            float partitionUse = partitions[partitionIndex].getUsePercent();
+                            float partitionUse = partitions[partitionIndex].getUse();
 
                             //weight the number of neighbours in that partition, by the space left
                             float score = e.getValue() * (1f - partitionUse);
@@ -70,7 +72,7 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
                     Tuple<Integer, Float> partitionScore = partitionScores.get(i);
                     Partition bestPartition = partitions[partitionScore.first];
 
-                    if (bestPartition.getUsePercent() - minUsed.getUsePercent() < 0.05) {
+                    if (bestPartition.getUse() - minUsed.getUse() < 0.05) {
                         bestPartition.addVertex(v);
                         break;
                     }

@@ -2,7 +2,7 @@ package uk.co.kubatek94.order;
 
 import uk.co.kubatek94.graph.G;
 import uk.co.kubatek94.graph.V;
-import uk.co.kubatek94.util.SortedArray;
+import uk.co.kubatek94.util.array.SortedArray;
 
 import java.util.Iterator;
 import java.util.Random;
@@ -22,7 +22,7 @@ public class BfsStreamOrder extends StreamOrder {
     public BfsStreamOrder(G graph) {
         super(graph);
         random = new Random();
-        vertices = new SortedArray<V>(graph.vertices().values(), (a, b) -> b.id().compareTo(a.id()) );
+        vertices = new SortedArray<>(graph.vertices().values(), (a, b) -> b.id().compareTo(a.id()) );
     }
 
     public V randomVertex() {

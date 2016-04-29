@@ -21,22 +21,23 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
     public GraphPartitioner partition(G graph) {
         int numVertices = graph.vertices().size();
         int capacity = Math.round(((float)numVertices/maxPartitions) * 5f); //highly over-provisioned system
+        int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(capacity);
+            partitions[i] = new Partition(capacity, fractionPerServer);
         }
 
         Supplier<Partition> minUsedPartition = () -> {
             int minIndex = -1;
-            int minUse = Integer.MAX_VALUE;
+            int minSize = Integer.MAX_VALUE;
 
             for (int i = 0; i < maxPartitions; i++) {
-                int use = partitions[i].getUse();
-                if (use < minUse) {
+                int size = partitions[i].getSize();
+                if (size < minSize) {
                     minIndex = i;
-                    minUse = use;
+                    minSize = size;
                 }
             }
 
@@ -56,7 +57,7 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
                         .entrySet().stream()
                         .map(e -> {
                             Partition p = partitions[e.getKey()];
-                            float partitionUse = p.getUsePercent();
+                            float partitionUse = p.getUse();
 
                             //weight the number of neighbours in that partition, by the space left
                             float score = e.getValue() * (1f - partitionUse);

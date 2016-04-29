@@ -4,8 +4,10 @@ import uk.co.kubatek94.dataset.Dataset;
 import uk.co.kubatek94.dataset.Facebook;
 import uk.co.kubatek94.dataset.Gplus;
 import uk.co.kubatek94.graph.G;
+import uk.co.kubatek94.order.BfsStreamOrder;
 import uk.co.kubatek94.order.HdfStreamOrder;
 import uk.co.kubatek94.order.LdfStreamOrder;
+import uk.co.kubatek94.order.RandomStreamOrder;
 import uk.co.kubatek94.partitioner.*;
 import uk.co.kubatek94.util.Evaluator;
 import uk.co.kubatek94.util.Timer;
@@ -23,11 +25,12 @@ public class Main {
         Timer.time();
 
         //GraphPartitioner partitioner = new HashPartitioner(4);
-        //GraphPartitioner partitioner = new WeightedLdgPartitioner(4);
-        GraphPartitioner partitioner = new WeightedUnbalancedLdgPartitioner(4);
-        partitioner.partition(graph.setStreamOrder(new LdfStreamOrder(graph)));
-        //partitioner.partition(graph.setStreamOrder(new BfsStreamOrder(graph)));
+        //GraphPartitioner partitioner = new WeightedLdgPartitioner(8);
+        //GraphPartitioner partitioner = new WeightedUnbalancedLdgPartitioner(8);
+        GraphPartitioner partitioner = new UnbalancedReplicationLdgPartitioner(4);
         //partitioner.partition(graph.setStreamOrder(new RandomStreamOrder(graph)));
+        partitioner.partition(graph.setStreamOrder(new BfsStreamOrder(graph)));
+        //partitioner.partition(graph.setStreamOrder(new HdfStreamOrder(graph)));
 
         //graph.setStreamOrder(new HdfStreamOrder(graph));
         //graph.stream().count();//.forEach(System.out::println);
@@ -51,5 +54,6 @@ public class Main {
         Evaluator evaluator = new Evaluator(graph);
 
         System.out.println("Average edge cut: " + evaluator.averageEdgeCut());
+        System.out.println("Replication cost: " + evaluator.replicationCost());
     }
 }

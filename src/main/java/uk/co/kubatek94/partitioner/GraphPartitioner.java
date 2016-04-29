@@ -37,4 +37,12 @@ public abstract class GraphPartitioner {
 
         return h & (tableLength-1);
     }
+
+    /**
+     * http://stackoverflow.com/questions/7139382/java-rounding-up-to-an-int-using-math-ceil
+     * @return ceil(numerator/denominator)
+     */
+    public static int divideAndCeil(int numerator, int denominator) {
+        return (numerator - 1) / denominator + 1;
+    }
 }

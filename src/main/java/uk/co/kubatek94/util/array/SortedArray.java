@@ -1,9 +1,6 @@
-package uk.co.kubatek94.util;
+package uk.co.kubatek94.util.array;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Created by kubatek94 on 29/04/16.
@@ -16,12 +13,12 @@ import java.util.Iterator;
  * It provides methods to remove elements from the beginning and the end of the array (removeFirst, removeLast).
  * It does not resize the array. It does not provide boundary checks.
  */
-public class SortedArray<T> {
-    private T elements[];
-    private Comparator<T> comparator;
+public class SortedArray<T> implements Iterable<T> {
+    protected T elements[];
+    protected Comparator<T> comparator;
 
-    private int leftIndex = 0;
-    private int rightIndex = 0;
+    protected int leftIndex = 0;
+    protected int rightIndex = 0;
 
     public SortedArray(int size, Comparator<T> comparator) {
         this.elements = (T[]) new Object[size];
@@ -46,8 +43,8 @@ public class SortedArray<T> {
         return elements[leftIndex + index];
     }
 
-    public int size() {
-        return rightIndex - leftIndex;
+    public int get(T element) {
+        return Arrays.binarySearch(elements, leftIndex, rightIndex, element, comparator) - leftIndex;
     }
 
     public T removeFirst() {
@@ -90,11 +87,20 @@ public class SortedArray<T> {
     }
 
     public void remove(T element) {
-        int index = findIndex(element);
+        int index = get(element);
         remove(index);
     }
 
-    public int findIndex(T element) {
-        return Arrays.binarySearch(elements, leftIndex, rightIndex, element, comparator) - leftIndex;
+    public int size() {
+        return rightIndex - leftIndex;
+    }
+
+    protected void resort() {
+        Arrays.sort(elements, leftIndex, rightIndex, comparator);
+    }
+
+    @Override
+    public SortedArrayIterator<T> iterator() {
+        return new SortedArrayIterator<>(this);
     }
 }
