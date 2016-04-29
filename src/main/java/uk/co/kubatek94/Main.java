@@ -25,12 +25,13 @@ public class Main {
         Timer.time();
 
         //GraphPartitioner partitioner = new HashPartitioner(4);
-        //GraphPartitioner partitioner = new WeightedLdgPartitioner(8);
-        //GraphPartitioner partitioner = new WeightedUnbalancedLdgPartitioner(8);
-        GraphPartitioner partitioner = new UnbalancedReplicationLdgPartitioner(4);
+        //GraphPartitioner partitioner = new WeightedLdgPartitioner(4);
+        //GraphPartitioner partitioner = new WeightedUnbalancedLdgPartitioner(4);
+        GraphPartitioner partitioner = new UnbalancedReplicationLdgPartitioner(8);
         //partitioner.partition(graph.setStreamOrder(new RandomStreamOrder(graph)));
         partitioner.partition(graph.setStreamOrder(new BfsStreamOrder(graph)));
         //partitioner.partition(graph.setStreamOrder(new HdfStreamOrder(graph)));
+        //partitioner.partition(graph.setStreamOrder(new LdfStreamOrder(graph)));
 
         //graph.setStreamOrder(new HdfStreamOrder(graph));
         //graph.stream().count();//.forEach(System.out::println);

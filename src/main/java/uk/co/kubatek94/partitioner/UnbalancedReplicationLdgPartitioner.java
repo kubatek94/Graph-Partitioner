@@ -67,7 +67,7 @@ public class UnbalancedReplicationLdgPartitioner extends GraphPartitioner {
             //if it does, then replicate a vertex with highest degree
             //from the most used partition and put it in the least used partition
             float threshold = minMax.second.getUse() - minMax.first.getUse();
-            if (threshold > 0.8) {
+            if (threshold > 0.05) {
                 //replicate highest degree vertex to one partition at a time
                 //if it was replicated to all the partitions,
                 //then replicate the next highest degree vertex
