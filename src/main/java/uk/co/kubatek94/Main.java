@@ -13,7 +13,7 @@ import uk.co.kubatek94.util.Timer;
 public class Main {
 
     public static void main(String[] args) {
-        Dataset inputSet = new Gplus();
+        Dataset inputSet = new Facebook();
 
         Timer.time();
         G graph = G.fromStream(inputSet.getEdgeStream());

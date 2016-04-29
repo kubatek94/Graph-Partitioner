@@ -2,6 +2,7 @@ package uk.co.kubatek94.partitioner;
 
 import uk.co.kubatek94.graph.G;
 import uk.co.kubatek94.graph.V;
+import uk.co.kubatek94.util.Tuple;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -76,7 +77,7 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
                 }
 
                 //couldn't add to any partition where there are neighbours already
-                //so add vertex to minUsed partition
+                //so add vertex to least used partition
                 if (v.partition() == -1) {
                     minUsed.addVertex(v);
                 }
@@ -86,20 +87,5 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
         });
 
         return this;
-    }
-
-    private class Tuple<A, B> {
-        public A first;
-        public B second;
-
-        public Tuple(A first, B second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%s,%s)", first.toString(), second.toString());
-        }
     }
 }

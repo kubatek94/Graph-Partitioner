@@ -2,11 +2,10 @@ package uk.co.kubatek94.partitioner;
 
 import uk.co.kubatek94.graph.G;
 import uk.co.kubatek94.graph.V;
+import uk.co.kubatek94.util.Tuple;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -74,20 +73,4 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
 
         return this;
     }
-
-    private class Tuple<A, B> {
-        public A first;
-        public B second;
-
-        public Tuple(A first, B second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%s,%s)", first.toString(), second.toString());
-        }
-    }
-
 }
