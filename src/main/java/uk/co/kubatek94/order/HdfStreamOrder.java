@@ -15,11 +15,12 @@ import java.util.Iterator;
  */
 public class HdfStreamOrder extends StreamOrder {
     protected SortedArray<V> vertices;
-    private V currentVertex = null;
-    private Iterator<V> neighboursIterator = null;
+    /*private V currentVertex = null;
+    private Iterator<V> neighboursIterator = null;*/
 
-    public HdfStreamOrder(G graph) {
-        super(graph);
+    @Override
+    public void setGraph(G graph) {
+        this.graph = graph;
 
         vertices = new SortedArray<V>(graph.vertices().values(), (a, b) -> {
             //sort by the degree first, then by the id if they have equal size

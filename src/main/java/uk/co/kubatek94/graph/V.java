@@ -10,51 +10,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by kubatek94 on 25/04/16.
  */
-public class V /*implements Comparable<V>*/ {
+public class V {
     private String id = null;
-    private int partition = -1;
     private Set<Integer> partitions = null;
-    private ConcurrentLinkedQueue<V> neighs = null;
-    private AtomicInteger size = new AtomicInteger(0);
+    private ConcurrentHashMap<String, V> neighbours = null;
 
     public V(String id) {
         this.id = id;
-        init();
-    }
-
-    public void init() {
-        this.neighs = new ConcurrentLinkedQueue<>();
+        this.neighbours = new ConcurrentHashMap<>();
         this.partitions = new HashSet<>();
-        this.size = new AtomicInteger(0);
     }
 
     public V addNeighbour(V neighbour) {
-        neighs.add(neighbour);
-        size.incrementAndGet();
-        //neighs.put(neighbour.id(), neighbour);
+        neighbours.put(neighbour.id(), neighbour);
         return this;
     }
 
     public V removeNeighbour(V neighbour) {
-        neighs.remove(neighbour);
-        size.decrementAndGet();
-        //neighs.remove(neighbour.id());
+        neighbours.remove(neighbour.id());
         return this;
     }
 
-    /*public ConcurrentSkipListSet<V> neighs() {
-        return neighs;
-    }*/
-    /*public ConcurrentHashMap<String, V> neighs() {
-        return neighs;
-    }*/
-    public ConcurrentLinkedQueue<V> neighs() {
-        return neighs;
+    public ConcurrentHashMap<String, V> neighbours() {
+        return neighbours;
     }
 
     public Integer size() {
-        //return neighs.size();
-        return size.intValue();
+        return neighbours.size();
     }
 
     public String id() {
@@ -65,13 +47,8 @@ public class V /*implements Comparable<V>*/ {
         return partitions;
     }
 
-    public int partition() {
-        return partition;
-    }
-
     public V partition(int p) {
-        this.partition = p;
-        this.partitions.add(p);
+        partitions.add(p);
         return this;
     }
 
@@ -88,10 +65,4 @@ public class V /*implements Comparable<V>*/ {
     public String toString() {
         return String.format("V[%s]", id);
     }
-
-    /*@Override
-    public int compareTo(V o) {
-        return (partition == o.partition()) ? -1 : (new Integer(partition).compareTo(o.partition()));
-        //return (partition == o.partition()) ? id.compareTo(o.id()) : (new Integer(partition).compareTo(o.partition()));
-    }*/
 }

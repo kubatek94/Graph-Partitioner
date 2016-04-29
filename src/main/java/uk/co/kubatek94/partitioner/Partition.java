@@ -5,6 +5,10 @@ import uk.co.kubatek94.util.array.SortedArray;
 import uk.co.kubatek94.util.array.SortedArrayIterator;
 import uk.co.kubatek94.util.array.SortedDynamicArray;
 
+import java.util.Iterator;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 /**
  * Created by kubatek94 on 25/04/16.
  */
@@ -18,13 +22,13 @@ public class Partition {
     private int size = 0;
     private float use = 0;
 
-    private final SortedDynamicArray<V> vertices;
+    private final SortedSet<V> vertices;
 
     public Partition(int capacity, int targetFraction) {
         this.capacity = capacity;
         this.targetFraction = targetFraction;
 
-        this.vertices = new SortedDynamicArray<>(capacity, (a, b) -> {
+        this.vertices = new TreeSet<>((a, b) -> {
             //sort by the degree first, then by the id if they have equal size
             int result = b.size().compareTo(a.size());
             if (result == 0) {
@@ -53,7 +57,7 @@ public class Partition {
         return false;
     }
 
-    public SortedArrayIterator<V> iterator() {
+    public Iterator<V> iterator() {
         return vertices.iterator();
     }
 

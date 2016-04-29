@@ -6,10 +6,7 @@ import uk.co.kubatek94.util.array.SortedArray;
 import uk.co.kubatek94.util.Tuple;
 import uk.co.kubatek94.util.array.SortedArrayIterator;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -28,7 +25,7 @@ public class UnbalancedReplicationLdgPartitioner extends GraphPartitioner {
     @Override
     public GraphPartitioner partition(G graph) {
         int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 2f); //highly over-provisioned system
+        int capacity = Math.round(((float)numVertices/maxPartitions) * 3f); //highly over-provisioned system
         int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required
@@ -71,7 +68,7 @@ public class UnbalancedReplicationLdgPartitioner extends GraphPartitioner {
                 //replicate highest degree vertex to one partition at a time
                 //if it was replicated to all the partitions,
                 //then replicate the next highest degree vertex
-                SortedArrayIterator<V> iterator = minMax.second.iterator();
+                Iterator<V> iterator = minMax.second.iterator();
                 while (iterator.hasNext()) {
                     V highDegreeVertex = iterator.next();
                     Set<Integer> partitions = highDegreeVertex.partitions();
@@ -86,7 +83,7 @@ public class UnbalancedReplicationLdgPartitioner extends GraphPartitioner {
 
             //neighbourPartitions will be a map of PartitionIndex => Count of V's neighbours in that partition
             Map<Integer, Long> neighbourPartitions =
-                    v.neighs() //get v's direct neighbours
+                    v.neighbours().values() //get v's direct neighbours
                             .stream() //create stream of them
                             .filter(n -> !n.partitions().isEmpty()) //filter out neighbours that were not partitioned yet
                             .flatMap(n -> n.partitions().stream())

@@ -19,8 +19,8 @@ public class BfsStreamOrder extends StreamOrder {
     private Iterator<V> neighboursIterator = null;
     private Random random;
 
-    public BfsStreamOrder(G graph) {
-        super(graph);
+    public void setGraph(G graph) {
+        this.graph = graph;
         random = new Random();
         vertices = new SortedArray<>(graph.vertices().values(), (a, b) -> b.id().compareTo(a.id()) );
     }
@@ -34,12 +34,12 @@ public class BfsStreamOrder extends StreamOrder {
     public V get() {
         if (currentVertex == null) {
             currentVertex = randomVertex();
-            neighboursIterator = currentVertex.neighs().iterator();
+            neighboursIterator = currentVertex.neighbours().values().iterator();
             return currentVertex;
         } else {
             while (neighboursIterator.hasNext()) {
                 V vertex = neighboursIterator.next();
-                if (vertex.partitions().isEmpty()) {
+                if (vertex.partitions().isEmpty()){
                     vertices.remove(vertex);
                     return vertex;
                 }

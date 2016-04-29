@@ -2,6 +2,8 @@ package uk.co.kubatek94.graph;
 
 import uk.co.kubatek94.order.RandomStreamOrder;
 import uk.co.kubatek94.order.StreamOrder;
+import uk.co.kubatek94.partitioner.GraphPartitioner;
+import uk.co.kubatek94.partitioner.Partition;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,9 +15,18 @@ import java.util.stream.Stream;
 public class G {
     private ConcurrentHashMap<String, V> vertices = null;
     private StreamOrder streamOrder = null;
+    private GraphPartitioner graphPartitioner = null;
 
     public G() {
+        this(null);
+    }
+
+    public G(StreamOrder streamOrder) {
         vertices = new ConcurrentHashMap<>();
+        if (streamOrder == null) {
+            streamOrder = new RandomStreamOrder();
+        }
+        this.streamOrder = streamOrder;
     }
 
     public G addVertex(V vertex) {
@@ -41,15 +52,11 @@ public class G {
 
         if (previousFirst != null) {
             first = previousFirst;
-        }/* else {
-            first.init();
-        }*/
+        }
 
         if (previousSecond != null) {
             second = previousSecond;
-        }/* else {
-            second.init();
-        }*/
+        }
 
         //connect two vertices
         first.addNeighbour(second);
@@ -58,17 +65,18 @@ public class G {
         return this;
     }
 
-    public G setStreamOrder(StreamOrder streamOrder) {
-        this.streamOrder = streamOrder;
+    public GraphPartitioner partitioner() {
+        return graphPartitioner;
+    }
+
+    public G partition(GraphPartitioner graphPartitioner) {
+        this.graphPartitioner = graphPartitioner;
+        graphPartitioner.partition(this);
         return this;
     }
 
     public Stream<V> stream() {
-        if (this.streamOrder == null) {
-            this.streamOrder = new RandomStreamOrder(this);
-        }
-
-        //this.streamOrder.setGraph(this);
+        this.streamOrder.setGraph(this);
         return Stream.generate(this.streamOrder).sequential().limit(vertices.size());
     }
 
@@ -77,11 +85,9 @@ public class G {
         return (instance.totalMemory() - instance.freeMemory()) / 1024;
     }
 
-    public static G fromStream(Stream<E> edgeStream) {
-        G graph = new G();
-
+    public static G fromStream(Stream<E> edgeStream, StreamOrder streamOrder) {
+        G graph = new G(streamOrder);
         edgeStream.forEach(edge -> graph.addEdge(edge));
-
         return graph;
     }
 }

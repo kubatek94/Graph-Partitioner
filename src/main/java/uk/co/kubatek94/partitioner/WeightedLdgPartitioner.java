@@ -5,6 +5,7 @@ import uk.co.kubatek94.graph.V;
 import uk.co.kubatek94.util.Tuple;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -46,10 +47,11 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
         graph.stream().forEach(v -> {
             //neighbourPartitions will be a map of PartitionIndex => Count of V's neighbours in that partition
             Map<Integer, Long> neighbourPartitions =
-                    v.neighs() //get v's direct neighbours
-                    .stream() //create stream of them
-                    .filter(p -> p.partition() != -1) //filter out neighbours that were not partitioned yet
-                    .collect(Collectors.groupingBy(V::partition, Collectors.counting())); //count number of neighbours in each partition
+                    v.neighbours().values() //get v's direct neighbours
+                            .stream() //create stream of them
+                            .filter(n -> !n.partitions().isEmpty()) //filter out neighbours that were not partitioned yet
+                            .flatMap(n -> n.partitions().stream())
+                            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             int neighbourPartitionsSize = neighbourPartitions.size();
             Partition minUsed = minUsedPartition.get();
@@ -80,7 +82,7 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
 
                 //couldn't add to any partition where there are neighbours already
                 //so add vertex to least used partition
-                if (v.partition() == -1) {
+                if (v.partitions().isEmpty()){
                     minUsed.addVertex(v);
                 }
             } else {

@@ -9,10 +9,7 @@ import java.util.function.Supplier;
  * Created by kubatek94 on 25/04/16.
  */
 public abstract class StreamOrder implements Supplier<V> {
-    protected final G graph;
-
-    public StreamOrder(G graph) {
-        this.graph = graph;
-    }
+    protected G graph = null;
+    public abstract void setGraph(G graph);
 }
 

@@ -12,11 +12,12 @@ import java.util.Random;
  * RandomStreamOrder will pick a random vertex from the graph, every time .get() is called.
  */
 public class RandomStreamOrder extends StreamOrder {
-    protected final Random random;
+    protected Random random;
     protected ArrayList<V> vertices;
 
-    public RandomStreamOrder(G graph) {
-        super(graph);
+    @Override
+    public void setGraph(G graph) {
+        this.graph = graph;
         random = new Random();
         vertices = new ArrayList<>(graph.vertices().values());
     }
