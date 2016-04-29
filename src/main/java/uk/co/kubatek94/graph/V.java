@@ -19,6 +19,7 @@ public class V /*implements Comparable<V>*/ {
 
     public V(String id) {
         this.id = id;
+        init();
     }
 
     public void init() {

@@ -41,15 +41,15 @@ public class G {
 
         if (previousFirst != null) {
             first = previousFirst;
-        } else {
+        }/* else {
             first.init();
-        }
+        }*/
 
         if (previousSecond != null) {
             second = previousSecond;
-        } else {
+        }/* else {
             second.init();
-        }
+        }*/
 
         //connect two vertices
         first.addNeighbour(second);

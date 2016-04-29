@@ -1,6 +1,5 @@
 package uk.co.kubatek94.partitioner;
 
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import uk.co.kubatek94.graph.V;
 
 import java.util.HashMap;
