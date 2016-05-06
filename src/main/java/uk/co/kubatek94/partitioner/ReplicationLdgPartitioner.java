@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 /**
  * Created by kubatek94 on 29/04/16.
- * UnbalancedReplicationLdgPartitioner will place the vertices in partition where they have most neighbours.
+ * ReplicationLdgPartitioner will place the vertices in partition where they have most neighbours.
  * When a partition will become unbalanced above threshold t, the partitioner will replicate highest degree vertices to under-loaded partitions.
  */
-public class UnbalancedReplicationLdgPartitioner extends GraphPartitioner {
+public class ReplicationLdgPartitioner extends GraphPartitioner {
 
-    public UnbalancedReplicationLdgPartitioner(int maxPartitions) {
+    public ReplicationLdgPartitioner(int maxPartitions) {
         super(maxPartitions);
     }
 
@@ -31,7 +31,7 @@ public class UnbalancedReplicationLdgPartitioner extends GraphPartitioner {
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(capacity, fractionPerServer);
+            partitions[i] = new SortedPartition(capacity, fractionPerServer);
         }
 
         Supplier<Tuple<Partition,Partition>> minMaxPartitions = () -> {
@@ -68,7 +68,7 @@ public class UnbalancedReplicationLdgPartitioner extends GraphPartitioner {
                 //replicate highest degree vertex to one partition at a time
                 //if it was replicated to all the partitions,
                 //then replicate the next highest degree vertex
-                Iterator<V> iterator = minMax.second.iterator();
+                Iterator<V> iterator = ((SortedPartition) minMax.second).iterator();
                 while (iterator.hasNext()) {
                     V highDegreeVertex = iterator.next();
                     Set<Integer> partitions = highDegreeVertex.partitions();
