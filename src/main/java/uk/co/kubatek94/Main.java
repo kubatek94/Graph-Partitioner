@@ -15,7 +15,7 @@ import uk.co.kubatek94.util.Timer;
 public class Main {
 
     public static void main(String[] args) {
-        Dataset inputSet = new Gplus();
+        Dataset inputSet = new Facebook();
 
         Timer.time();
         G graph = G.fromStream(inputSet.getEdgeStream(), new BfsStreamOrder());
@@ -24,11 +24,10 @@ public class Main {
 
         Timer.time();
         //graph.partition(new WeightedLdgPartitioner(4));
-        graph.partition(new ReplicationLdgPartitioner(4));
-        //graph.partition(new BufferingLdgPartitioner(4));
+        //graph.partition(new ReplicationLdgPartitioner(4));
+        graph.partition(new BufferingLdgPartitioner(4));
         //graph.partition(new WeightedUnbalancedLdgPartitioner(4));
         System.out.println("Took: " + (Timer.time()/1000.0) + " seconds to partition");
-
 
         Evaluator evaluator = new Evaluator(graph);
 

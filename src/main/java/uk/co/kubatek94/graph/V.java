@@ -31,6 +31,10 @@ public class V {
         return this;
     }
 
+    public boolean hasNeighbour(V vertex) {
+        return neighbours.get(vertex.id()) != null;
+    }
+
     public ConcurrentHashMap<String, V> neighbours() {
         return neighbours;
     }
