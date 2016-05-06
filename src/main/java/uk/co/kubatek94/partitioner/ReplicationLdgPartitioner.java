@@ -25,7 +25,7 @@ public class ReplicationLdgPartitioner extends GraphPartitioner {
     @Override
     public GraphPartitioner partition(G graph) {
         int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 3f); //highly over-provisioned system
+        int capacity = Math.round(((float)numVertices/maxPartitions) * 2f); //highly over-provisioned system
         int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required

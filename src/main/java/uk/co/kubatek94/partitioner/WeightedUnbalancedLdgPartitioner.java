@@ -2,6 +2,7 @@ package uk.co.kubatek94.partitioner;
 
 import uk.co.kubatek94.graph.G;
 import uk.co.kubatek94.graph.V;
+import uk.co.kubatek94.util.Triplet;
 import uk.co.kubatek94.util.Tuple;
 
 import java.util.Map;
@@ -21,7 +22,7 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
     @Override
     public GraphPartitioner partition(G graph) {
         int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 5f); //highly over-provisioned system
+        int capacity = Math.round(((float)numVertices/maxPartitions) * 2f); //highly over-provisioned system
         int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required
@@ -54,23 +55,25 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
                             .flatMap(n -> n.partitions().stream())
                             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-            if (neighbourPartitions.size() > 0) {
-                Optional<Tuple<Partition, Float>> bestPartition = neighbourPartitions
-                        .entrySet().stream()
-                        .map(e -> {
-                            Partition p = partitions[e.getKey()];
-                            float partitionUse = p.getUse();
+            Optional<Triplet<Partition, Float, Long>> bestPartition = neighbourPartitions
+                    .entrySet().stream()
+                    .map(e -> {
+                        Partition p = partitions[e.getKey()];
+                        float partitionUse = p.getUse();
 
-                            //weight the number of neighbours in that partition, by the space left
-                            float score = e.getValue() * (1f - partitionUse);
-                            return new Tuple<>(p, score);
-                        })
-                        .sorted( (a,b) -> b.second.compareTo(a.second) )
-                        .findFirst();
+                        float score = e.getValue() * (1f - partitionUse);
+                        return new Triplet<>(p, score, e.getValue());
+                    })
+                    .sorted( (a,b) -> b.second.compareTo(a.second) )
+                    .findFirst();
 
-                bestPartition.get().first.addVertex(v);
-            } else {
+            //either get best partition, or the least used if vertex has no neighbours in partitions yet
+            Triplet<Partition, Float, Long> targetPartition = bestPartition.orElseGet(() -> new Triplet<>(minUsedPartition.get(), 0f, 0L));
+
+            if (targetPartition.third < 3) {
                 minUsedPartition.get().addVertex(v);
+            } else {
+                targetPartition.first.addVertex(v);
             }
         });
 

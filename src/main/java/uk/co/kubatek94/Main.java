@@ -5,6 +5,9 @@ import uk.co.kubatek94.dataset.Facebook;
 import uk.co.kubatek94.dataset.Gplus;
 import uk.co.kubatek94.graph.G;
 import uk.co.kubatek94.order.BfsStreamOrder;
+import uk.co.kubatek94.order.HdfStreamOrder;
+import uk.co.kubatek94.order.LdfStreamOrder;
+import uk.co.kubatek94.order.RandomStreamOrder;
 import uk.co.kubatek94.partitioner.*;
 import uk.co.kubatek94.util.Evaluator;
 import uk.co.kubatek94.util.Timer;
@@ -20,7 +23,10 @@ public class Main {
         System.out.println("Number of vertices: " + graph.vertices().size());
 
         Timer.time();
-        graph.partition(new UnbalancedReplicationLdgPartitioner(4));
+        //graph.partition(new WeightedLdgPartitioner(4));
+        graph.partition(new ReplicationLdgPartitioner(4));
+        //graph.partition(new BufferingLdgPartitioner(4));
+        //graph.partition(new WeightedUnbalancedLdgPartitioner(4));
         System.out.println("Took: " + (Timer.time()/1000.0) + " seconds to partition");
 
 

@@ -7,7 +7,7 @@ import uk.co.kubatek94.graph.G;
  */
 public abstract class GraphPartitioner {
     protected final int maxPartitions;
-    protected int numPartitions = 1;
+    protected int numPartitions = 2;
     protected final Partition[] partitions;
 
     public GraphPartitioner(int maxPartitions) {

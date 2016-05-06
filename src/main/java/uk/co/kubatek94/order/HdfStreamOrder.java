@@ -15,8 +15,8 @@ import java.util.Iterator;
  */
 public class HdfStreamOrder extends StreamOrder {
     protected SortedArray<V> vertices;
-    /*private V currentVertex = null;
-    private Iterator<V> neighboursIterator = null;*/
+    //private V currentVertex = null;
+    //private Iterator<V> neighboursIterator = null;
 
     @Override
     public void setGraph(G graph) {
@@ -41,7 +41,7 @@ public class HdfStreamOrder extends StreamOrder {
         return nextVertex();
         /*if (currentVertex == null) {
             currentVertex = nextVertex();
-            neighboursIterator = currentVertex.neighs().iterator();
+            neighboursIterator = currentVertex.neighbours().values().iterator();
             return currentVertex;
         } else {
             while (neighboursIterator.hasNext()) {

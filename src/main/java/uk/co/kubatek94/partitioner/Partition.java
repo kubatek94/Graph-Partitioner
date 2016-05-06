@@ -13,29 +13,18 @@ import java.util.TreeSet;
  * Created by kubatek94 on 25/04/16.
  */
 public class Partition {
-    public static int PARTITION_COUNTER = 0;
+    protected static int PARTITION_COUNTER = 0;
     private final int id = PARTITION_COUNTER++;
 
-    private int capacity = 0;
-    private int targetFraction = 0;
+    protected int capacity = 0;
+    protected int targetFraction = 0;
 
-    private int size = 0;
-    private float use = 0;
-
-    private final SortedSet<V> vertices;
+    protected int size = 0;
+    protected float use = 0;
 
     public Partition(int capacity, int targetFraction) {
         this.capacity = capacity;
         this.targetFraction = targetFraction;
-
-        this.vertices = new TreeSet<>((a, b) -> {
-            //sort by the degree first, then by the id if they have equal size
-            int result = b.size().compareTo(a.size());
-            if (result == 0) {
-                return b.id().compareTo(a.id());
-            }
-            return result;
-        });
     }
 
     public int id() {
@@ -45,20 +34,12 @@ public class Partition {
     public boolean addVertex(V vertex) {
         if (size < capacity) {
             vertex.partition(id);
-            vertices.add(vertex);
             size++;
-
             use = ((float) size / capacity);
             return true;
-        } else {
-            System.out.println("No more..");
         }
 
         return false;
-    }
-
-    public Iterator<V> iterator() {
-        return vertices.iterator();
     }
 
     public float getFractionUse() {
