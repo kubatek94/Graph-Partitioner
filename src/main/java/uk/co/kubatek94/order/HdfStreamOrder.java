@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 /**
  * Created by kubatek94 on 28/04/16.
- * HdfStreamOrder (High Degree First) will pick next vertex in graph with highest degree (number of neighbours) every time .get() is called,
+ * HdfStreamOrder (High Degree First) will pick next vertex in graph with highest degree (number of neighbours) every time .get() is called.
  */
 public class HdfStreamOrder extends StreamOrder {
     protected SortedArray<V> vertices;
