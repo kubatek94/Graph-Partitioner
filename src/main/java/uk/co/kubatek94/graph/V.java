@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class V {
     private String id = null;
     private Set<Integer> partitions = null;
+    private boolean outOfStream = false;
     private ConcurrentHashMap<String, V> neighbours = null;
 
     public V(String id) {
@@ -54,6 +55,15 @@ public class V {
     public V partition(int p) {
         partitions.add(p);
         return this;
+    }
+
+    public V outOfStream(boolean outOfStream) {
+        this.outOfStream = outOfStream;
+        return this;
+    }
+
+    public boolean isOutOfStream() {
+        return outOfStream;
     }
 
     @Override

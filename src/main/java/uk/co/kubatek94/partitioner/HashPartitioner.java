@@ -21,7 +21,7 @@ public class HashPartitioner extends GraphPartitioner {
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(capacity, fractionPerServer); //add more space to make sure that all vertices will fit
+            partitions[i] = new Partition(i, capacity, fractionPerServer); //add more space to make sure that all vertices will fit
         }
 
         //loop through all vertices and assign each to partition

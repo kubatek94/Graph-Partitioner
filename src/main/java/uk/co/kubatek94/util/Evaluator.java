@@ -1,13 +1,18 @@
 package uk.co.kubatek94.util;
 
+import uk.co.kubatek94.dataset.Dataset;
 import uk.co.kubatek94.graph.G;
-import uk.co.kubatek94.partitioner.Partition;
+import uk.co.kubatek94.order.*;
+import uk.co.kubatek94.partitioner.*;
 
+import java.io.OutputStream;
 import java.util.Collections;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Created by kubatek94 on 27/04/16.
@@ -45,41 +50,114 @@ public class Evaluator {
         return graph.vertices().values().stream().filter(v -> v.partitions().isEmpty()).count();
     }
 
-    public float replicationCost() {
-        float numberOfReplicatedVertices = graph.vertices().values().stream()
+    public double partitionImbalance() {
+        Partition[] partitions = this.graph.partitioner().partitions();
+
+        double minUse = Float.MAX_VALUE;
+        double maxUse = Float.MIN_VALUE;
+
+        for (Partition p : partitions) {
+            if (p != null) {
+                double use = p.getUse();
+                if (use < minUse) {
+                    minUse = use;
+                }
+                if (use > maxUse) {
+                    maxUse = use;
+                }
+            }
+        }
+
+        return (maxUse - minUse);
+    }
+
+    public double replicationCost() {
+        double numberOfReplicatedVertices = graph.vertices().values().parallelStream()
                 .filter(v -> v.partitions().size() > 1)
                 .count();
 
         return numberOfReplicatedVertices / graph.vertices().size();
     }
 
-    public float averageEdgeCut() {
-        final FloatWrap totalEdgesCut = new FloatWrap(0);
+    public double averageEdgeCut() {
+        double sum = graph.vertices()
+                .values()
+                .parallelStream()
+                .map(v -> {
+                    Set<Integer> partitions = v.partitions();
 
-        graph.vertices().values().stream().forEach(v -> {
-            Set<Integer> partitions = v.partitions();
+                    long outPartition = v.neighbours().values()
+                            .stream()
+                            .filter(n -> Collections.disjoint(partitions, n.partitions())) //filter out neighbours that are on the same partition
+                            .count(); //count the neighbours left in the stream
 
-            long outPartition = v.neighbours().values()
-                    .stream()
-                    .filter(n -> Collections.disjoint(partitions, n.partitions())) //filter out neighbours that are on the same partition
-                    .count(); //count the neighbours left in the stream
+                    long inPartition = v.size() - outPartition;
 
-            long inPartition = v.size() - outPartition;
+                    //ratio between neighbours in different partitions and total number of neighbours
+                    return ((double) outPartition / (inPartition + outPartition));
+                })
+                .reduce(0.0, (a, b) -> (a + b));
 
-            //ratio between neighbours in different partitions and total number of neighbours
-            float edgesCut = ((float) outPartition / (inPartition + outPartition));
-
-            totalEdgesCut.value = totalEdgesCut.value + edgesCut;
-        });
-
-        return totalEdgesCut.value / graph.vertices().size();
+        return sum / graph.vertices().size();
     }
 
-    public class FloatWrap {
-        public float value = 0;
+    public static Stream<EvaluationResult> evaluateDataset(Dataset inputSet, int numberOfPartitions, int numberOfRepeats){
+        //partitionerName, streamOrderName, datasetName, numberOfVertices, numberOfPartitions, partitionImbalance, edgeCut, replicationCost, timeTaken
+        LinkedList<EvaluationResult> evaluationResults = new LinkedList<>();
 
-        public FloatWrap(float value) {
-            this.value = value;
+        //System.out.println("Evaluate dataset " + inputSet);
+
+        Supplier<GraphPartitioner[]> partitioners = () -> new GraphPartitioner[]{
+            new HashPartitioner(numberOfPartitions),
+            new WeightedLdgPartitioner(numberOfPartitions),
+            new WeightedUnbalancedLdgPartitioner(numberOfPartitions),
+            //new BufferingLdgPartitioner(numberOfPartitions),
+            new ReplicationLdgPartitioner(numberOfPartitions)
+        };
+
+        Supplier<StreamOrder[]> streamOrders = () -> new StreamOrder[]{
+                new RandomStreamOrder(),
+                new BfsStreamOrder(),
+                new HdBfsStreamOrder(),
+                new LdBfsStreamOrder(),
+                new HdfStreamOrder(),
+                new LdfStreamOrder()
+        };
+
+        G graph = G.fromStream(inputSet.getEdgeStream());
+
+        for(int i = 0; i < numberOfRepeats; i++) {
+            GraphPartitioner[] graphPartitioners = partitioners.get();
+            for (GraphPartitioner partitioner : graphPartitioners) {
+                StreamOrder[] streams = streamOrders.get();
+
+                for (StreamOrder streamOrder : streams) {
+                    EvaluationResult result = new EvaluationResult();
+
+                    System.out.println("Evaluating " + inputSet + " with partitioner " + partitioner + " with " + streamOrder);
+
+                    Timer.time();
+                    graph.setStreamOrder(streamOrder);
+                    graph.partition(partitioner);
+                    result.timeTaken = String.valueOf(Timer.time()/1000.0);
+
+                    result.partitionerName = partitioner.toString();
+                    result.datasetName = inputSet.toString();
+                    result.streamOrderName = streamOrder.toString();
+                    result.numberOfVertices = String.valueOf(graph.vertices().size());
+                    result.numberOfPartitions = String.valueOf(numberOfPartitions);
+
+                    Evaluator evaluator = new Evaluator(graph);
+                    result.edgeCut = String.valueOf(evaluator.averageEdgeCut());
+                    result.replicationCost = String.valueOf(evaluator.replicationCost());
+                    result.partitionImbalance = String.valueOf(evaluator.partitionImbalance());
+
+                    evaluationResults.addLast(result);
+                    graph.unpartition();
+                }
+            }
         }
+
+        return evaluationResults.parallelStream();
     }
 }

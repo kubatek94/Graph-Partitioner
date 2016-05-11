@@ -22,13 +22,13 @@ public class BufferingLdgPartitioner extends GraphPartitioner {
     @Override
     public GraphPartitioner partition(G graph) {
         int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 1.5f); //highly over-provisioned system
+        int capacity = Math.round(((float)numVertices/maxPartitions) * 3f); //highly over-provisioned system
         int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(capacity, fractionPerServer); //add more space to make sure that all vertices will fit
+            partitions[i] = new Partition(i, capacity, fractionPerServer); //add more space to make sure that all vertices will fit
         }
 
         Iterator<V> vertices = graph.stream().iterator();
@@ -44,11 +44,17 @@ public class BufferingLdgPartitioner extends GraphPartitioner {
             //if there are more vertices
             if (vertices.hasNext()) {
                 //take next vertex
-                V curr;
+                V curr = vertices.next();
 
                 //place it at the back of the list as long as it is head's neighbour
-                while (((curr = vertices.next()) != null) && head.hasNeighbour(curr)) {
+                while (head.hasNeighbour(curr)) {
                     group.addLast(curr);
+
+                    if (vertices.hasNext()) {
+                        curr = vertices.next();
+                    } else {
+                        break;
+                    }
                 }
 
                 //if element wasn't placed in the list, then it becomes the new head

@@ -34,13 +34,15 @@ public class BfsStreamOrder extends StreamOrder {
     public V get() {
         if (currentVertex == null) {
             currentVertex = randomVertex();
+            currentVertex.outOfStream(true);
             neighboursIterator = currentVertex.neighbours().values().iterator();
             return currentVertex;
         } else {
             while (neighboursIterator.hasNext()) {
                 V vertex = neighboursIterator.next();
-                if (vertex.partitions().isEmpty()){
+                if (!vertex.isOutOfStream()) {
                     vertices.remove(vertex);
+                    vertex.outOfStream(true);
                     return vertex;
                 }
             }
@@ -48,21 +50,5 @@ public class BfsStreamOrder extends StreamOrder {
             currentVertex = null;
             return get();
         }
-
-
-        /*if (currentVertex == null) {
-            currentVertex = randomVertex();
-            //neighs = currentVertex.neighs();
-            return currentVertex;
-        } else {
-            V vertex = neighs.first();
-            if (vertex.partition() == -1) {
-                vertices.remove(vertex);
-                return vertex;
-            }
-
-            currentVertex = null;
-            return get();
-        }*/
     }
 }

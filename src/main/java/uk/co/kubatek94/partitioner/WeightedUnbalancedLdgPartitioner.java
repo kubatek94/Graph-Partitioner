@@ -22,13 +22,13 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
     @Override
     public GraphPartitioner partition(G graph) {
         int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 2f); //highly over-provisioned system
+        int capacity = Math.round(((float)numVertices/maxPartitions) * 5f); //highly over-provisioned system
         int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
 
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(capacity, fractionPerServer);
+            partitions[i] = new Partition(i, capacity, fractionPerServer);
         }
 
         Supplier<Partition> minUsedPartition = () -> {

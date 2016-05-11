@@ -23,4 +23,8 @@ public abstract class Dataset {
     }
 
     public abstract Stream<E> getEdgeStream();
+
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
 }

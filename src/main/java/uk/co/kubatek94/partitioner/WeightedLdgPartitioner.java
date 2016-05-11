@@ -26,7 +26,7 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(capacity, fractionPerServer);
+            partitions[i] = new Partition(i, capacity, fractionPerServer);
         }
 
         Supplier<Partition> minUsedPartition = () -> {

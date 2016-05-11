@@ -23,9 +23,6 @@ public class G {
 
     public G(StreamOrder streamOrder) {
         vertices = new ConcurrentHashMap<>();
-        if (streamOrder == null) {
-            streamOrder = new RandomStreamOrder();
-        }
         this.streamOrder = streamOrder;
     }
 
@@ -65,6 +62,11 @@ public class G {
         return this;
     }
 
+    public G setStreamOrder(StreamOrder streamOrder) {
+        this.streamOrder = streamOrder;
+        return this;
+    }
+
     public GraphPartitioner partitioner() {
         return graphPartitioner;
     }
@@ -72,6 +74,19 @@ public class G {
     public G partition(GraphPartitioner graphPartitioner) {
         this.graphPartitioner = graphPartitioner;
         graphPartitioner.partition(this);
+        return this;
+    }
+
+    /**
+     * This method resets partition indices for all vertices, so we can re-partition the graph,
+     * without reading it from memory again.
+     * @return
+     */
+    public G unpartition() {
+        vertices.values().parallelStream().forEach(v -> {
+            v.partitions().clear();
+            v.outOfStream(false);
+        });
         return this;
     }
 
@@ -89,5 +104,9 @@ public class G {
         G graph = new G(streamOrder);
         edgeStream.forEach(edge -> graph.addEdge(edge));
         return graph;
+    }
+
+    public static G fromStream(Stream<E> edgeStream) {
+        return fromStream(edgeStream, null);
     }
 }

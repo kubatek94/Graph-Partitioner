@@ -18,13 +18,15 @@ public class HdBfsStreamOrder extends HdfStreamOrder {
     public V get() {
         if (currentVertex == null) {
             currentVertex = nextVertex();
+            currentVertex.outOfStream(true);
             neighboursIterator = currentVertex.neighbours().values().iterator();
             return currentVertex;
         } else {
             while (neighboursIterator.hasNext()) {
                 V vertex = neighboursIterator.next();
-                if (vertex.partitions().isEmpty()) {
+                if (!vertex.isOutOfStream()) {
                     vertices.remove(vertex);
+                    vertex.outOfStream(true);
                     return vertex;
                 }
             }

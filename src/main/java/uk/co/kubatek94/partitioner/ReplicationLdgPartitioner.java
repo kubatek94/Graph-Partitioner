@@ -31,7 +31,7 @@ public class ReplicationLdgPartitioner extends GraphPartitioner {
         //create partitions required
         numPartitions = maxPartitions;
         for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new SortedPartition(capacity, fractionPerServer);
+            partitions[i] = new SortedPartition(i, capacity, fractionPerServer);
         }
 
         Supplier<Tuple<Partition,Partition>> minMaxPartitions = () -> {

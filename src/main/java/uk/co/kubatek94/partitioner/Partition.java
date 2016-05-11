@@ -13,8 +13,7 @@ import java.util.TreeSet;
  * Created by kubatek94 on 25/04/16.
  */
 public class Partition {
-    protected static int PARTITION_COUNTER = 0;
-    private final int id = PARTITION_COUNTER++;
+    private final int id;
 
     protected int capacity = 0;
     protected int targetFraction = 0;
@@ -22,7 +21,8 @@ public class Partition {
     protected int size = 0;
     protected float use = 0;
 
-    public Partition(int capacity, int targetFraction) {
+    public Partition(int id, int capacity, int targetFraction) {
+        this.id = id;
         this.capacity = capacity;
         this.targetFraction = targetFraction;
     }

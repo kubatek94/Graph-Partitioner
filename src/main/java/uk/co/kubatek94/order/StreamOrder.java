@@ -11,5 +11,9 @@ import java.util.function.Supplier;
 public abstract class StreamOrder implements Supplier<V> {
     protected G graph = null;
     public abstract void setGraph(G graph);
+
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
 }
 

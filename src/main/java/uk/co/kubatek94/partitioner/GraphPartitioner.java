@@ -8,7 +8,7 @@ import uk.co.kubatek94.graph.G;
 public abstract class GraphPartitioner {
     protected final int maxPartitions;
     protected int numPartitions = 2;
-    protected final Partition[] partitions;
+    protected Partition[] partitions;
 
     public GraphPartitioner(int maxPartitions) {
         this.maxPartitions = maxPartitions;
@@ -44,5 +44,9 @@ public abstract class GraphPartitioner {
      */
     public static int divideAndCeil(int numerator, int denominator) {
         return (numerator - 1) / denominator + 1;
+    }
+
+    public String toString() {
+        return this.getClass().getSimpleName();
     }
 }
