@@ -1,6 +1,8 @@
 package uk.co.kubatek94.dataset;
 
 import uk.co.kubatek94.graph.E;
+import uk.co.kubatek94.graph.G;
+
 import java.util.stream.Stream;
 
 /**
@@ -10,7 +12,7 @@ public class Gplus extends Dataset {
     private final static String path = "/home/kubatek94/Desktop/DissertationProject/datasets/gplus/gplus_combined.csv";
 
     public Gplus() {
-        super(path);
+        super(path, G.Type.DIRECTED);
     }
 
     @Override

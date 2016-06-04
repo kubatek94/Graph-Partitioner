@@ -81,17 +81,21 @@ public class Evaluator {
                 .values()
                 .parallelStream()
                 .map(v -> {
-                    Set<Integer> partitions = v.partitions();
+	                Set<Integer> partitions = v.partitions();
 
-                    long outPartition = v.neighbours().values()
-                            .stream()
-                            .filter(n -> Collections.disjoint(partitions, n.partitions())) //filter out neighbours that are on the same partition
-                            .count(); //count the neighbours left in the stream
+                    if (v.size() > 0 && !partitions.isEmpty()) {
+	                    long outPartition = v.neighbours().values()
+			                    .stream()
+			                    .filter(n -> Collections.disjoint(partitions, n.partitions())) //filter out neighbours that are on the same partition
+			                    .count(); //count the neighbours left in the stream
 
-                    long inPartition = v.size() - outPartition;
+	                    long inPartition = v.size() - outPartition;
 
-                    //ratio between neighbours in different partitions and total number of neighbours
-                    return ((double) outPartition / (inPartition + outPartition));
+	                    //ratio between neighbours in different partitions and total number of neighbours
+	                    return ((double) outPartition / (inPartition + outPartition));
+                    } else {
+	                    return (double) 0;
+                    }
                 })
                 .reduce(0.0, (a, b) -> (a + b));
 

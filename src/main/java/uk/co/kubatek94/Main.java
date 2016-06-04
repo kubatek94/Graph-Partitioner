@@ -12,17 +12,17 @@ public class Main {
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 		//Dataset inputSet = new Twitter();
-        Dataset inputSet = new Facebook();
-		//Dataset inputSet = new Gplus();
+        //Dataset inputSet = new Facebook();
+		Dataset inputSet = new Gplus();
 
         Timer.time();
-        G graph = G.fromStream(inputSet.getEdgeStream(), new RandomFirstOrderStreamOrder());
+        G graph = G.fromDataset(inputSet, new RandomFirstOrderStreamOrder());
         System.out.println("Took: " + (Timer.time()/1000.0) + " seconds to load graph into memory");
         System.out.println("Number of vertices: " + graph.vertices().size());
 
         Timer.time();
-        graph.partition(new WeightedLdgPartitioner(4));
-        //graph.partition(new ReplicatingLdgPartitioner(4));
+        graph.partition(new WeightedLdgPartitioner(16));
+        //graph.partition(new ReplicatingLdgPartitioner(16));
         //graph.partition(new BufferingLdgPartitioner(4));
         //graph.partition(new WeightedUnbalancedLdgPartitioner(4));
         System.out.println("Took: " + (Timer.time()/1000.0) + " seconds to partition");

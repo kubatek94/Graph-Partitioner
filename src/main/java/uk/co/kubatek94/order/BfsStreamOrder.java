@@ -37,11 +37,11 @@ public class BfsStreamOrder extends StreamOrder {
 
 		vertex.outOfStream(true);
 		Collection<V> neighbours = vertex.neighbours().values();
-		neighbours.forEach(neighbour -> {
+		for (V neighbour : neighbours) {
 			if (!neighbour.isOutOfStream()) {
 				queue.addLast(neighbour);
 			}
-		});
+		}
 
 		return vertex;
 	}

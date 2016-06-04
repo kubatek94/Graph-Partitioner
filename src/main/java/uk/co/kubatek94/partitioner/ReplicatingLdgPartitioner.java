@@ -25,6 +25,9 @@ public class ReplicatingLdgPartitioner extends GraphPartitioner {
     @Override
     public GraphPartitioner partition(G graph) {
         overProvision = 2f;
+	    for(int i = 0; i < partitions.length; i++) {
+		   partitions[i] = new SortedPartition(i);
+	    }
         super.partition(graph);
 
         graph.stream().forEach(v -> {

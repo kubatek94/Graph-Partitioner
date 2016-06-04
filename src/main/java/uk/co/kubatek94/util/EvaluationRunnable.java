@@ -49,7 +49,7 @@ public class EvaluationRunnable implements Runnable {
         //Load graphs in sequence, as single graph load is parallelised anyway
         List<Tuple<String, G>> graphs = queue.sequential().map(dataset -> {
             System.out.print("Loading graph... ");
-            G graph = G.fromStream(dataset.getEdgeStream());
+            G graph = G.fromDataset(dataset);
             System.out.println("done.");
 
             return new Tuple<>(dataset.toString(), graph);

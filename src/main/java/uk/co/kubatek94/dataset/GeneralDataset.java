@@ -1,6 +1,7 @@
 package uk.co.kubatek94.dataset;
 
 import uk.co.kubatek94.graph.E;
+import uk.co.kubatek94.graph.G;
 
 import java.util.stream.Stream;
 
@@ -10,8 +11,8 @@ import java.util.stream.Stream;
 public class GeneralDataset extends Dataset {
     private String name = "GeneralDataset";
 
-    public GeneralDataset(String name, String path) {
-        super(path);
+    public GeneralDataset(String name, String path, G.Type graphType) {
+        super(path, graphType);
         this.name = name;
     }
 

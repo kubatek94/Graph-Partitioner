@@ -1,6 +1,7 @@
 package uk.co.kubatek94.dataset;
 
 import uk.co.kubatek94.graph.E;
+import uk.co.kubatek94.graph.G;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,14 +14,21 @@ import java.util.stream.Stream;
  */
 public abstract class Dataset {
     protected Stream<String> stream = null;
+    protected G.Type graphType = G.Type.UNDIRECTED;
 
-    public Dataset(String path) {
+    public Dataset(String path, G.Type graphType) {
+	    this.graphType = graphType;
+
         try {
             stream = Files.lines(Paths.get(path));
         } catch (IOException e) {
             throw new InvalidPathException(path, "Could not open file!");
         }
     }
+
+	public G.Type getGraphType() {
+		return graphType;
+	}
 
     public abstract Stream<E> getEdgeStream();
 
