@@ -21,48 +21,35 @@ public class BufferingLdgPartitioner extends GraphPartitioner {
 
     @Override
     public GraphPartitioner partition(G graph) {
-        int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 3f); //highly over-provisioned system
-        int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
-
-        //create partitions required
-        numPartitions = maxPartitions;
-        for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(i, capacity, fractionPerServer); //add more space to make sure that all vertices will fit
-        }
+        overProvision = 3f;
+        super.partition(graph);
 
         Iterator<V> vertices = graph.stream().iterator();
-
-        V head = null;
         LinkedList<V> group = new LinkedList<>();
+	    V head = null;
 
         if (vertices.hasNext()) head = vertices.next();
 
-        while (head != null) {
+        while (vertices.hasNext()) {
             group.addFirst(head);
 
-            //if there are more vertices
-            if (vertices.hasNext()) {
-                //take next vertex
-                V curr = vertices.next();
+            //take next vertex
+            V curr = vertices.next();
 
-                //place it at the back of the list as long as it is head's neighbour
-                while (head.hasNeighbour(curr)) {
-                    group.addLast(curr);
+            //place it at the back of the list as long as it is head's neighbour
+            while (head.hasNeighbour(curr)) {
+                group.addLast(curr);
 
-                    if (vertices.hasNext()) {
-                        curr = vertices.next();
-                    } else {
-                        break;
-                    }
+                if (vertices.hasNext()) {
+                    curr = vertices.next();
+                } else {
+                    break;
                 }
+            }
 
-                //if element wasn't placed in the list, then it becomes the new head
-                if (curr != group.getLast()) {
-                    head = curr;
-                }
-            } else {
-                head = null;
+            //if element wasn't placed in the list, then it becomes the new head
+            if (curr != group.getLast()) {
+                head = curr;
             }
 
             //take that list of vertices and place them in a partition
@@ -73,28 +60,6 @@ public class BufferingLdgPartitioner extends GraphPartitioner {
         }
 
         return this;
-    }
-
-    private Tuple<Partition,Partition> getMinMaxPartitions() {
-        int minIndex = -1;
-        int minSize = Integer.MAX_VALUE;
-
-        int maxIndex = -1;
-        int maxSize = Integer.MIN_VALUE;
-
-        for (int i = 0; i < maxPartitions; i++) {
-            int size = partitions[i].getSize();
-            if (size < minSize) {
-                minIndex = i;
-                minSize = size;
-            }
-            if (size > maxSize) {
-                maxSize = size;
-                maxIndex = i;
-            }
-        }
-
-        return new Tuple<>(partitions[minIndex], partitions[maxIndex]);
     }
 
     private void partitionGroup(List<V> vertices) {

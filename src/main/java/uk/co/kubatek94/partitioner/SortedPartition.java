@@ -12,11 +12,11 @@ import java.util.TreeSet;
 public class SortedPartition extends Partition {
     private final SortedSet<V> vertices;
 
-    public SortedPartition(int id, int capacity, int targetFraction) {
-        super(id, capacity, targetFraction);
+    public SortedPartition(int id) {
+        super(id);
 
         this.vertices = new TreeSet<>((a, b) -> {
-            //sort by the degree first, then by the id if they have equal size
+            //sort by the degree first, then by the id if they have equal degree
             int result = b.size().compareTo(a.size());
             if (result == 0) {
                 return b.id().compareTo(a.id());

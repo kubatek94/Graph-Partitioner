@@ -1,25 +1,91 @@
 package uk.co.kubatek94.partitioner;
 
 import uk.co.kubatek94.graph.G;
+import uk.co.kubatek94.util.Tuple;
 
 /**
  * Created by kubatek94 on 25/04/16.
  */
 public abstract class GraphPartitioner {
-    protected final int maxPartitions;
-    protected int numPartitions = 2;
+    protected final int numPartitions;
     protected Partition[] partitions;
+	protected float overProvision = 5f;
 
-    public GraphPartitioner(int maxPartitions) {
-        this.maxPartitions = maxPartitions;
-        this.partitions = new Partition[maxPartitions];
+    public GraphPartitioner(int numPartitions) {
+	    this.numPartitions = numPartitions;
+        this.partitions = new Partition[numPartitions];
+
+	    //create partitions required
+	    for (int i = 0; i < numPartitions; i++) {
+		    partitions[i] = new Partition(i); //add more space to make sure that all vertices will fit
+	    }
+    }
+
+    public int numPartitions() {
+        return numPartitions;
     }
 
     public Partition[] partitions() {
         return partitions;
     }
 
-    public abstract GraphPartitioner partition(G graph);
+    public GraphPartitioner partition(G graph) {
+	    int numVertices = graph.vertices().size();
+	    int capacity = Math.round(((float)numVertices/numPartitions) * overProvision); //over-provisioned system
+	    int targetFraction = divideAndCeil(numVertices, numPartitions);
+
+	    for (Partition p : partitions) {
+		    p.setCapacity(capacity);
+		    p.setTargetFraction(targetFraction);
+	    }
+
+	    return this;
+    }
+
+	/**
+	 * Gets a tuple with least used partition in the first item, and most used partition in the second item
+	 * @return Tuple
+	 */
+    public Tuple<Partition,Partition> getMinMaxPartitions() {
+        int minIndex = -1;
+        int minSize = Integer.MAX_VALUE;
+
+        int maxIndex = -1;
+        int maxSize = Integer.MIN_VALUE;
+
+        for (int i = 0; i < numPartitions; i++) {
+            int size = partitions[i].getSize();
+            if (size < minSize) {
+                minIndex = i;
+                minSize = size;
+            }
+            if (size > maxSize) {
+                maxSize = size;
+                maxIndex = i;
+            }
+        }
+
+        return new Tuple<>(partitions[minIndex], partitions[maxIndex]);
+    }
+
+	/**
+	 * Gets least used partition
+	 * @return Partition
+	 */
+	public Partition getMinPartition() {
+		int minIndex = -1;
+		int minSize = Integer.MAX_VALUE;
+
+		for (int i = 0; i < numPartitions; i++) {
+			int size = partitions[i].getSize();
+			if (size < minSize) {
+				minIndex = i;
+				minSize = size;
+			}
+		}
+
+		return partitions[minIndex];
+	}
 
     /**
      * Applies a supplemental hash function to a given hashCode, which

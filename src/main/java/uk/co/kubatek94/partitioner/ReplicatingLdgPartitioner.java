@@ -13,52 +13,23 @@ import java.util.stream.Collectors;
 
 /**
  * Created by kubatek94 on 29/04/16.
- * ReplicationLdgPartitioner will place the vertices in partition where they have most neighbours.
+ * ReplicatingLdgPartitioner will place the vertices in partition where they have most neighbours.
  * When a partition will become unbalanced above threshold t, the partitioner will replicate highest degree vertices to under-loaded partitions.
  */
-public class ReplicationLdgPartitioner extends GraphPartitioner {
+public class ReplicatingLdgPartitioner extends GraphPartitioner {
 
-    public ReplicationLdgPartitioner(int maxPartitions) {
+    public ReplicatingLdgPartitioner(int maxPartitions) {
         super(maxPartitions);
     }
 
     @Override
     public GraphPartitioner partition(G graph) {
-        int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 2f); //highly over-provisioned system
-        int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
-
-        //create partitions required
-        numPartitions = maxPartitions;
-        for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new SortedPartition(i, capacity, fractionPerServer);
-        }
-
-        Supplier<Tuple<Partition,Partition>> minMaxPartitions = () -> {
-            int minIndex = -1;
-            int minSize = Integer.MAX_VALUE;
-
-            int maxIndex = -1;
-            int maxSize = Integer.MIN_VALUE;
-
-            for (int i = 0; i < maxPartitions; i++) {
-                int size = partitions[i].getSize();
-                if (size < minSize) {
-                    minIndex = i;
-                    minSize = size;
-                }
-                if (size > maxSize) {
-                    maxSize = size;
-                    maxIndex = i;
-                }
-            }
-
-            return new Tuple<>(partitions[minIndex], partitions[maxIndex]);
-        };
+        overProvision = 2f;
+        super.partition(graph);
 
         graph.stream().forEach(v -> {
             //find least and most used partitions
-            Tuple<Partition,Partition> minMax = minMaxPartitions.get();
+            Tuple<Partition,Partition> minMax = getMinMaxPartitions();
 
             //check if the most used partition exceeds the threshold
             //if it does, then replicate a vertex with highest degree
@@ -75,6 +46,7 @@ public class ReplicationLdgPartitioner extends GraphPartitioner {
 
                     if (!partitions.contains(minMax.first.id())){
                         minMax.first.addVertex(highDegreeVertex);
+                        //System.out.format("Replicate %s to partition %d\n", highDegreeVertex, minMax.first.id());
                         //System.out.format("Replicated %s, Partitions: %s\n", highDegreeVertex, highDegreeVertex.partitions());
                         break;
                     }

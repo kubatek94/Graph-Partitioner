@@ -19,30 +19,8 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
 
     @Override
     public GraphPartitioner partition(G graph) {
-        int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 1.1f); //add more space to make sure that all vertices will fit
-        int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
-
-        //create partitions required
-        numPartitions = maxPartitions;
-        for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(i, capacity, fractionPerServer);
-        }
-
-        Supplier<Partition> minUsedPartition = () -> {
-            int minIndex = -1;
-            int minSize = Integer.MAX_VALUE;
-
-            for (int i = 0; i < maxPartitions; i++) {
-                int size = partitions[i].getSize();
-                if (size < minSize) {
-                    minIndex = i;
-                    minSize = size;
-                }
-            }
-
-            return partitions[minIndex];
-        };
+        overProvision = 1.1f;
+        super.partition(graph);
 
         graph.stream().forEach(v -> {
             //neighbourPartitions will be a map of PartitionIndex => Count of V's neighbours in that partition
@@ -54,7 +32,7 @@ public class WeightedLdgPartitioner extends GraphPartitioner {
                             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             int neighbourPartitionsSize = neighbourPartitions.size();
-            Partition minUsed = minUsedPartition.get();
+            Partition minUsed = getMinPartition();
 
             if (neighbourPartitionsSize > 0) {
                 List<Tuple<Integer, Float>> partitionScores = neighbourPartitions

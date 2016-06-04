@@ -21,30 +21,8 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
 
     @Override
     public GraphPartitioner partition(G graph) {
-        int numVertices = graph.vertices().size();
-        int capacity = Math.round(((float)numVertices/maxPartitions) * 5f); //highly over-provisioned system
-        int fractionPerServer = divideAndCeil(numVertices, maxPartitions);
-
-        //create partitions required
-        numPartitions = maxPartitions;
-        for (int i = 0; i < maxPartitions; i++) {
-            partitions[i] = new Partition(i, capacity, fractionPerServer);
-        }
-
-        Supplier<Partition> minUsedPartition = () -> {
-            int minIndex = -1;
-            int minSize = Integer.MAX_VALUE;
-
-            for (int i = 0; i < maxPartitions; i++) {
-                int size = partitions[i].getSize();
-                if (size < minSize) {
-                    minIndex = i;
-                    minSize = size;
-                }
-            }
-
-            return partitions[minIndex];
-        };
+	    overProvision = 5f;
+	    super.partition(graph);
 
         graph.stream().forEach(v -> {
             //neighbourPartitions will be a map of PartitionIndex => Count of V's neighbours in that partition
@@ -68,13 +46,15 @@ public class WeightedUnbalancedLdgPartitioner extends GraphPartitioner {
                     .findFirst();
 
             //either get best partition, or the least used if vertex has no neighbours in partitions yet
-            Triplet<Partition, Float, Long> targetPartition = bestPartition.orElseGet(() -> new Triplet<>(minUsedPartition.get(), 0f, 0L));
+            Triplet<Partition, Float, Long> targetPartition = bestPartition.orElseGet(() -> new Triplet<>(getMinPartition(), 0f, 0L));
 
-            if (targetPartition.third < 3) {
-                minUsedPartition.get().addVertex(v);
-            } else {
-                targetPartition.first.addVertex(v);
-            }
+	        Partition minUsed = getMinPartition();
+
+	        if (targetPartition.first.getFractionUse() - minUsed.getFractionUse() > 0.8 && targetPartition.third < 3) {
+		        minUsed.addVertex(v);
+	        } else {
+		        targetPartition.first.addVertex(v);
+	        }
         });
 
         return this;

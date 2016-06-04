@@ -32,7 +32,8 @@ public class Evaluator {
 
         for (Partition p : partitions) {
             if (p != null) {
-                float use = p.getUse();
+                //float use = p.getUse();
+                float use = p.getFractionUse();
                 if (use < minUse) {
                     minUse = use;
                 }
@@ -44,10 +45,6 @@ public class Evaluator {
         }
 
         System.out.println("Partition imbalance: " + (maxUse - minUse));
-    }
-
-    public long unassignedVertices() {
-        return graph.vertices().values().stream().filter(v -> v.partitions().isEmpty()).count();
     }
 
     public double partitionImbalance() {
@@ -101,63 +98,36 @@ public class Evaluator {
         return sum / graph.vertices().size();
     }
 
-    public static Stream<EvaluationResult> evaluateDataset(Dataset inputSet, int numberOfPartitions, int numberOfRepeats){
-        //partitionerName, streamOrderName, datasetName, numberOfVertices, numberOfPartitions, partitionImbalance, edgeCut, replicationCost, timeTaken
-        LinkedList<EvaluationResult> evaluationResults = new LinkedList<>();
+    public static EvaluationResult evaluatePartitioner(GraphPartitioner partitioner, StreamOrder streamOrder, G graph, String inputSetName) {
+        EvaluationResult result = new EvaluationResult();
 
-        //System.out.println("Evaluate dataset " + inputSet);
+        //System.out.println("Evaluating " + inputSetName + " with partitioner " + partitioner + " with " + streamOrder);
+        Timer.time();
 
-        Supplier<GraphPartitioner[]> partitioners = () -> new GraphPartitioner[]{
-            new HashPartitioner(numberOfPartitions),
-            new WeightedLdgPartitioner(numberOfPartitions),
-            new WeightedUnbalancedLdgPartitioner(numberOfPartitions),
-            //new BufferingLdgPartitioner(numberOfPartitions),
-            new ReplicationLdgPartitioner(numberOfPartitions)
-        };
+        long startTime = System.currentTimeMillis();
 
-        Supplier<StreamOrder[]> streamOrders = () -> new StreamOrder[]{
-                new RandomStreamOrder(),
-                new BfsStreamOrder(),
-                new HdBfsStreamOrder(),
-                new LdBfsStreamOrder(),
-                new HdfStreamOrder(),
-                new LdfStreamOrder()
-        };
+        graph.setStreamOrder(streamOrder);
+        graph.partition(partitioner);
 
-        G graph = G.fromStream(inputSet.getEdgeStream());
+        long endTime = System.currentTimeMillis();
 
-        for(int i = 0; i < numberOfRepeats; i++) {
-            GraphPartitioner[] graphPartitioners = partitioners.get();
-            for (GraphPartitioner partitioner : graphPartitioners) {
-                StreamOrder[] streams = streamOrders.get();
+        result.timeTaken = String.valueOf( (endTime-startTime)/1000.0 );
 
-                for (StreamOrder streamOrder : streams) {
-                    EvaluationResult result = new EvaluationResult();
+        result.partitionerName = partitioner.toString();
+        result.datasetName = inputSetName;
+        result.streamOrderName = streamOrder.toString();
+        result.numberOfVertices = String.valueOf(graph.vertices().size());
+        result.numberOfPartitions = String.valueOf(partitioner.numPartitions());
 
-                    System.out.println("Evaluating " + inputSet + " with partitioner " + partitioner + " with " + streamOrder);
+        Evaluator evaluator = new Evaluator(graph);
+        result.edgeCut = String.valueOf(evaluator.averageEdgeCut());
+        result.replicationCost = String.valueOf(evaluator.replicationCost());
+        result.partitionImbalance = String.valueOf(evaluator.partitionImbalance());
 
-                    Timer.time();
-                    graph.setStreamOrder(streamOrder);
-                    graph.partition(partitioner);
-                    result.timeTaken = String.valueOf(Timer.time()/1000.0);
+        graph.unpartition();
 
-                    result.partitionerName = partitioner.toString();
-                    result.datasetName = inputSet.toString();
-                    result.streamOrderName = streamOrder.toString();
-                    result.numberOfVertices = String.valueOf(graph.vertices().size());
-                    result.numberOfPartitions = String.valueOf(numberOfPartitions);
-
-                    Evaluator evaluator = new Evaluator(graph);
-                    result.edgeCut = String.valueOf(evaluator.averageEdgeCut());
-                    result.replicationCost = String.valueOf(evaluator.replicationCost());
-                    result.partitionImbalance = String.valueOf(evaluator.partitionImbalance());
-
-                    evaluationResults.addLast(result);
-                    graph.unpartition();
-                }
-            }
-        }
-
-        return evaluationResults.parallelStream();
+        return result;
     }
 }
+
+

@@ -14,8 +14,9 @@ public class EvaluationResult {
     public String replicationCost;
     public String timeTaken;
 
+    @Override
     public String toString() {
-        return String.format("%s, %s, %s, %s, %s, %s, %s, %s, %s",
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s",
                 partitionerName, streamOrderName, datasetName, numberOfVertices,
                 numberOfPartitions, partitionImbalance, edgeCut, replicationCost, timeTaken);
     }

@@ -21,11 +21,17 @@ public class Partition {
     protected int size = 0;
     protected float use = 0;
 
-    public Partition(int id, int capacity, int targetFraction) {
+    public Partition(int id) {
         this.id = id;
-        this.capacity = capacity;
-        this.targetFraction = targetFraction;
     }
+
+    public void setCapacity(int capacity) {
+	    this.capacity = capacity;
+    }
+
+	public void setTargetFraction(int targetFraction) {
+		this.targetFraction = targetFraction;
+	}
 
     public int id() {
         return id;
@@ -34,6 +40,7 @@ public class Partition {
     public boolean addVertex(V vertex) {
         if (size < capacity) {
             vertex.partition(id);
+
             size++;
             use = ((float) size / capacity);
             return true;
